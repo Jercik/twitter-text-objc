@@ -171,8 +171,8 @@
 #define TWUValidMentionOrList \
     @"(" TWUValidMentionPrecedingChars @")" \
     @"(" TWUAtSigns @")" \
-    @"([a-zA-Z0-9_]{1,20})" \
-    @"(/[a-zA-Z][a-zA-Z0-9_\\-]{0,24})?"
+    @"([a-zA-Z0-9_]{1,50})" \
+    @"(/[a-zA-Z][a-zA-Z0-9_\\-]{0,54})?"
 
 #define TWUValidReply                   @"\\A(?:[" TWUUnicodeSpaces @"])*" TWUAtSigns @"([a-zA-Z0-9_]{1,20})"
 #define TWUEndMentionMatch              @"\\A(?:" TWUAtSigns @"|[" TWULatinAccents @"]|://)"
