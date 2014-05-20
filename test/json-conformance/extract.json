@@ -470,7 +470,8 @@
         "text": "foo.bar foo.co.jp www.foo.bar www.foo.co.uk wwwww.foo foo.comm foo.somecom foo.govedu foo.jp",
         "expected": [
           "foo.co.jp",
-          "www.foo.co.uk"
+          "www.foo.co.uk",
+          "foo.jp"
         ]
       },
       {
@@ -544,10 +545,15 @@
         ]
       },
       {
-        "description": "DO NOT extract short URLs without protocol on ccTLD domains without path",
-        "text": "twitter.jp日本語t.co中国語foo.jp t.co foo.jp",
+        "description": "Extract short URLs without protocol on ccTLD domains without path",
+        "text": "twitter.jp日本語t.co中国語foo.jp t.co foo.jp google.pl",
         "expected": [
-
+			"twitter.jp",
+			"t.co",
+			"foo.jp",
+			"t.co",
+			"foo.jp",
+			"google.pl"
         ]
       },
       {
@@ -782,6 +788,7 @@
           "http://example.com",
           "http://example.com/path",
           "example.com/path",
+          "t.co",
           "t.co/abcde"
         ]
       },
