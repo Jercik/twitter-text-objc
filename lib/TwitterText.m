@@ -249,7 +249,7 @@
     @"(?:" TWUValidGTLD @"|" TWUValidCCTLD @"|" TWUValidPunycode @")" \
 
 #define TWUValidTCOURL                  @"https?://t\\.co/[a-zA-Z0-9]+"
-#define TWUInvalidShortDomain           @"\\A" TWUValidDomainName TWUValidCCTLD @"\\z"
+#define TWUInvalidShortDomain           @""
 
 #define TWUValidPortNumber              @"[0-9]+"
 #define TWUValidGeneralURLPathChars     @"[a-zA-Z0-9!\\*';:=+,.$/%#\\[\\]\\-_~&|@" TWULatinAccents @"]"
