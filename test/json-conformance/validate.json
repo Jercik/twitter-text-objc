@@ -1,5 +1,47 @@
 {
   "tests": {
+    "tweets": [
+      {
+        "description": "Valid Tweet: < 20 characters",
+        "text": "I am a Tweet",
+        "expected": true
+      },
+      {
+        "description": "Valid Tweet: 140 characters",
+        "text": "A lie gets halfway around the world before the truth has a chance to get its pants on.  Winston Churchill (1874-1965) http://bit.ly/dJpywL",
+        "expected": true
+      },
+      {
+        "description": "Valid Tweet: 140 characters (with accents)",
+        "text": "A lié géts halfway arøünd thé wørld béføré thé truth has a chance tø get its pants øn.  Winston Churchill (1874-1965) http://bit.ly/dJpywL",
+        "expected": true
+      },
+      {
+        "description": "Valid Tweet: 140 characters (double byte characters)",
+        "text": "のののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののの",
+        "expected": true
+      },
+      {
+        "description": "Valid Tweet: 140 characters (double word characters)",
+        "text": "🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱",
+        "expected": true
+      },
+      {
+        "description": "Invalid Tweet: no characters (empty)",
+        "text": "",
+        "expected": false
+      },
+      {
+        "description": "Invalid Tweet: 141 characters",
+        "text": "A lie gets halfway around the world before the truth has a chance to get its pants on. --- Winston Churchill (1874-1965) http://bit.ly/dJpywL",
+        "expected": false
+      },
+      {
+        "description": "Invalid Tweet: 141 characters (due to newline)",
+        "text": "A lie gets halfway around the world before the truth has a chance to get its pants on. \n-- Winston Churchill (1874-1965) http://bit.ly/dJpywL",
+        "expected": false
+      }
+    ],
     "usernames": [
       {
         "description": "Valid username: a-z < 20 characters",
@@ -20,6 +62,70 @@
         "description": "Usernames SHOULD NOT allow the - character",
         "text": "@example-name",
         "expected": false
+      }
+    ],
+    "lists": [
+      {
+        "description": "Valid list: a-z < 20 characters",
+        "text": "@username/list",
+        "expected": true
+      },
+      {
+        "description": "A username alone SHOULD NOT be considered a valid list",
+        "text": "@username",
+        "expected": false
+      },
+      {
+        "description": "A username followed by a slash SHOULD NOT be considered a valid list",
+        "text": "@username/",
+        "expected": false
+      },
+      {
+        "description": "Validation SHOULD NOT allow leading spaces",
+        "text": " @username/list",
+        "expected": false
+      },
+      {
+        "description": "Validation SHOULD NOT allow trailing spaces",
+        "text": "@username/list ",
+        "expected": false
+      }
+    ],
+    "hashtags": [
+      {
+        "description": "Valid hashtag: a-z < 20 characters",
+        "text": "#hashtag",
+        "expected": true
+      },
+      {
+        "description": "Valid hashtag: number followed by letters",
+        "text": "#1st",
+        "expected": true
+      },
+      {
+        "description": "Valid hashtag: letters and numbers mixed",
+        "text": "#that1time",
+        "expected": true
+      },
+      {
+        "description": "Valid hashtag: letter followed by numbers",
+        "text": "#easyas123",
+        "expected": true
+      },
+      {
+        "description": "Invalid hashtag: all numbers",
+        "text": "#12345",
+        "expected": false
+      },
+      {
+        "description": "Valid hashtag: Russian text",
+        "text": "#ашок",
+        "expected": true
+      },
+      {
+        "description": "Valid hashtag: Korean text",
+        "text": "#트위터",
+        "expected": true
       }
     ],
     "urls": [
@@ -156,85 +262,6 @@
         "expected": true
       }
     ],
-    "tweets": [
-      {
-        "description": "Valid Tweet: < 20 characters",
-        "text": "I am a Tweet",
-        "expected": true
-      },
-      {
-        "description": "Valid Tweet: 140 characters",
-        "text": "A lie gets halfway around the world before the truth has a chance to get its pants on.  Winston Churchill (1874-1965) http://bit.ly/dJpywL",
-        "expected": true
-      },
-      {
-        "description": "Valid Tweet: 140 characters (with accents)",
-        "text": "A lié géts halfway arøünd thé wørld béføré thé truth has a chance tø get its pants øn.  Winston Churchill (1874-1965) http://bit.ly/dJpywL",
-        "expected": true
-      },
-      {
-        "description": "Valid Tweet: 140 characters (double byte characters)",
-        "text": "のののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののののの",
-        "expected": true
-      },
-      {
-        "description": "Valid Tweet: 140 characters (double word characters)",
-        "text": "🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱",
-        "expected": true
-      },
-      {
-        "description": "Invalid Tweet: no characters (empty)",
-        "text": "",
-        "expected": false
-      },
-      {
-        "description": "Invalid Tweet: 141 characters",
-        "text": "A lie gets halfway around the world before the truth has a chance to get its pants on. --- Winston Churchill (1874-1965) http://bit.ly/dJpywL",
-        "expected": false
-      },
-      {
-        "description": "Invalid Tweet: 141 characters (due to newline)",
-        "text": "A lie gets halfway around the world before the truth has a chance to get its pants on. \n-- Winston Churchill (1874-1965) http://bit.ly/dJpywL",
-        "expected": false
-      }
-    ],
-    "hashtags": [
-      {
-        "description": "Valid hashtag: a-z < 20 characters",
-        "text": "#hashtag",
-        "expected": true
-      },
-      {
-        "description": "Valid hashtag: number followed by letters",
-        "text": "#1st",
-        "expected": true
-      },
-      {
-        "description": "Valid hashtag: letters and numbers mixed",
-        "text": "#that1time",
-        "expected": true
-      },
-      {
-        "description": "Valid hashtag: letter followed by numbers",
-        "text": "#easyas123",
-        "expected": true
-      },
-      {
-        "description": "Invalid hashtag: all numbers",
-        "text": "#12345",
-        "expected": false
-      },
-      {
-        "description": "Valid hashtag: Russian text",
-        "text": "#ашок",
-        "expected": true
-      },
-      {
-        "description": "Valid hashtag: Korean text",
-        "text": "#트위터",
-        "expected": true
-      }
-    ],
     "lengths": [
       {
         "description": "Count the number of characters",
@@ -275,33 +302,6 @@
         "description": "Count a mix of single byte single word, and double word unicode characters",
         "text": "H🐱☺",
         "expected": 3
-      }
-    ],
-    "lists": [
-      {
-        "description": "Valid list: a-z < 20 characters",
-        "text": "@username/list",
-        "expected": true
-      },
-      {
-        "description": "A username alone SHOULD NOT be considered a valid list",
-        "text": "@username",
-        "expected": false
-      },
-      {
-        "description": "A username followed by a slash SHOULD NOT be considered a valid list",
-        "text": "@username/",
-        "expected": false
-      },
-      {
-        "description": "Validation SHOULD NOT allow leading spaces",
-        "text": " @username/list",
-        "expected": false
-      },
-      {
-        "description": "Validation SHOULD NOT allow trailing spaces",
-        "text": "@username/list ",
-        "expected": false
       }
     ]
   }
