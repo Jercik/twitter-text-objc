@@ -1,7 +1,7 @@
 //
 //  TwitterTextTests.m
 //
-//  Copyright 2012 Twitter, Inc.
+//  Copyright 2012-2014 Twitter, Inc.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -23,6 +23,58 @@
 - (void)tearDown
 {
     [super tearDown];
+}
+
+- (void)testLongDomain
+{
+    NSString *text = @"jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp.jp";
+    NSArray *entities = [TwitterText entitiesInText:text];
+    STAssertEquals(entities.count, (NSUInteger)1, nil);
+    if (entities.count >= 1) {
+        TwitterTextEntity *entity = [entities objectAtIndex:0];
+        STAssertEquals(entity.range, NSMakeRange(0, text.length), nil);
+    }
+}
+
+- (void)testJapaneseTLDFollowedByJapaneseCharacters
+{
+    NSString *text = @"テスト test.みんなです";
+    NSArray *entities = [TwitterText entitiesInText:text];
+    STAssertEquals(entities.count, (NSUInteger)1, nil);
+    if (entities.count >= 1) {
+        TwitterTextEntity *entity = [entities objectAtIndex:0];
+        STAssertEquals(entity.range, NSMakeRange(4, 8), nil);
+    }
+}
+
+//THIS TEST DO NOT PASS (TWITTER BUG?)
+//- (void)testJapaneseTLDFollowedByASCIICharacters
+//{
+//    NSString *text = @"テスト test.みんなabc";
+//    NSArray *entities = [TwitterText entitiesInText:text];
+//    STAssertEquals(entities.count, (NSUInteger)0, nil);
+//}
+
+- (void)testDomainFollowedByJapaneseCharacters
+{
+    NSString *text = @"example.comてすとですtwitter.みんなです.comcast.com";
+    NSArray *entities = [TwitterText entitiesInText:text];
+    STAssertEquals(entities.count, (NSUInteger)3, nil);
+    if (entities.count >= 3) {
+        TwitterTextEntity *firstEntity = [entities objectAtIndex:0];
+        STAssertEquals(firstEntity.range, NSMakeRange(0, 11), nil);
+        TwitterTextEntity *secondEntity = [entities objectAtIndex:1];
+        STAssertEquals(secondEntity.range, NSMakeRange(16, 11), nil);
+        TwitterTextEntity *thirdEntity = [entities objectAtIndex:2];
+        STAssertEquals(thirdEntity.range, NSMakeRange(30, 11), nil);
+    }
+}
+
+- (void)testURLDomainWithInvalidTLD
+{
+    NSString *text = @"test http://example.comだよね.comtest/hogehoge";
+    NSArray *entities = [TwitterText entitiesInText:text];
+    STAssertEquals(entities.count, (NSUInteger)0, nil);
 }
 
 - (void)testExtract
@@ -51,8 +103,8 @@
     NSArray *urlsWithIndices = [tests objectForKey:@"urls_with_indices"];
     NSArray *hashtags = [tests objectForKey:@"hashtags"];
     NSArray *hashtagsWithIndices = [tests objectForKey:@"hashtags_with_indices"];
-    NSArray *cashtags = [tests objectForKey:@"cashtags"];
-    NSArray *cashtagsWithIndices = [tests objectForKey:@"cashtags_with_indices"];
+    NSArray *symbols = [tests objectForKey:@"cashtags"];
+    NSArray *symbolsWithIndices = [tests objectForKey:@"cashtags_with_indices"];
     
     //
     // Mentions
@@ -183,7 +235,7 @@
     for (NSDictionary *testCase in urls) {
         NSString *text = [testCase objectForKey:@"text"];
         NSArray *expected = [testCase objectForKey:@"expected"];
-        
+
         NSArray *results = [TwitterText URLsInText:text];
         if (results.count == expected.count) {
             NSInteger count = results.count;
@@ -197,7 +249,11 @@
                 STAssertEqualObjects(expectedText, actualText, @"%@", testCase);
             }
         } else {
-            STFail(@"Matching count is different: %lu != %lu\n%@", expected.count, results.count, testCase);
+            NSMutableArray *resultTexts = [NSMutableArray array];
+            for (TwitterTextEntity *entity in results) {
+                [resultTexts addObject:[text substringWithRange:entity.range]];
+            }
+            STFail(@"Matching count is different: %lu != %lu\n%@\n%@", expected.count, results.count, testCase, resultTexts);
         }
     }
     
@@ -216,8 +272,8 @@
                 NSDictionary *expectedDic = [expected objectAtIndex:i];
                 NSString *expectedUrl = [expectedDic objectForKey:@"url"];
                 NSArray *expectedIndices = [expectedDic objectForKey:@"indices"];
-                int expectedStart = [[expectedIndices objectAtIndex:0] intValue];
-                int expectedEnd = [[expectedIndices objectAtIndex:1] intValue];
+                NSInteger expectedStart = [[expectedIndices objectAtIndex:0] integerValue];
+                NSInteger expectedEnd = [[expectedIndices objectAtIndex:1] integerValue];
                 NSRange expectedRange = NSMakeRange(expectedStart, expectedEnd - expectedStart);
                 
                 TwitterTextEntity *entity = [results objectAtIndex:i];
@@ -228,7 +284,11 @@
                 STAssertTrue(NSEqualRanges(expectedRange, actualRange), @"%@ != %@\n%@", NSStringFromRange(expectedRange), NSStringFromRange(actualRange), testCase);
             }
         } else {
-            STFail(@"Matching count is different: %lu != %lu\n%@", expected.count, results.count, testCase);
+            NSMutableArray *resultTexts = [NSMutableArray array];
+            for (TwitterTextEntity *entity in results) {
+                [resultTexts addObject:[text substringWithRange:entity.range]];
+            }
+            STFail(@"Matching count is different: %lu != %lu\n%@\n%@", expected.count, results.count, testCase, resultTexts);
         }
     }
     
@@ -255,7 +315,11 @@
                 STAssertEqualObjects(expectedText, actualText, @"%@", testCase);
             }
         } else {
-            STFail(@"Matching count is different: %lu != %lu\n%@", expected.count, results.count, testCase);
+            NSMutableArray *resultTexts = [NSMutableArray array];
+            for (TwitterTextEntity *entity in results) {
+                [resultTexts addObject:[text substringWithRange:entity.range]];
+            }
+            STFail(@"Matching count is different: %lu != %lu\n%@\n%@", expected.count, results.count, testCase, resultTexts);
         }
     }
     
@@ -274,8 +338,8 @@
                 NSDictionary *expectedDic = [expected objectAtIndex:i];
                 NSString *expectedHashtag = [expectedDic objectForKey:@"hashtag"];
                 NSArray *expectedIndices = [expectedDic objectForKey:@"indices"];
-                int expectedStart = [[expectedIndices objectAtIndex:0] intValue];
-                int expectedEnd = [[expectedIndices objectAtIndex:1] intValue];
+                NSInteger expectedStart = [[expectedIndices objectAtIndex:0] integerValue];
+                NSInteger expectedEnd = [[expectedIndices objectAtIndex:1] integerValue];
                 NSRange expectedRange = NSMakeRange(expectedStart, expectedEnd - expectedStart);
                 
                 TwitterTextEntity *entity = [results objectAtIndex:i];
@@ -289,15 +353,18 @@
                 STAssertTrue(NSEqualRanges(expectedRange, actualRange), @"%@ != %@\n%@", NSStringFromRange(expectedRange), NSStringFromRange(actualRange), testCase);
             }
         } else {
-            STFail(@"Matching count is different: %lu != %lu\n%@", expected.count, results.count, testCase);
+            NSMutableArray *resultTexts = [NSMutableArray array];
+            for (TwitterTextEntity *entity in results) {
+                [resultTexts addObject:[text substringWithRange:entity.range]];
+            }
+            STFail(@"Matching count is different: %lu != %lu\n%@\n%@", expected.count, results.count, testCase, resultTexts);
         }
     }
     
     //
-    // Cashtag
+    // Symbols
     //
-    
-    for (NSDictionary *testCase in cashtags) {
+    for (NSDictionary *testCase in symbols) {
         NSString *text = [testCase objectForKey:@"text"];
         NSArray *expected = [testCase objectForKey:@"expected"];
         
@@ -316,14 +383,18 @@
                 STAssertEqualObjects(expectedText, actualText, @"%@", testCase);
             }
         } else {
-            STFail(@"Matching count is different: %lu != %lu\n%@", expected.count, results.count, testCase);
+            NSMutableArray *resultTexts = [NSMutableArray array];
+            for (TwitterTextEntity *entity in results) {
+                [resultTexts addObject:[text substringWithRange:entity.range]];
+            }
+            STFail(@"Matching count is different: %lu != %lu\n%@\n%@", expected.count, results.count, testCase, resultTexts);
         }
     }
     
     //
     // Symbols with indices
     //
-    for (NSDictionary *testCase in cashtagsWithIndices) {
+    for (NSDictionary *testCase in symbolsWithIndices) {
         NSString *text = [testCase objectForKey:@"text"];
         NSArray *expected = [testCase objectForKey:@"expected"];
         
@@ -332,7 +403,7 @@
             NSInteger count = results.count;
             for (NSInteger i=0; i<count; i++) {
                 NSDictionary *expectedDic = [expected objectAtIndex:i];
-                NSString *expectedCashtag = [expectedDic objectForKey:@"cashtag"];
+                NSString *expectedSymbol = [expectedDic objectForKey:@"cashtag"];
                 NSArray *expectedIndices = [expectedDic objectForKey:@"indices"];
                 int expectedStart = [[expectedIndices objectAtIndex:0] intValue];
                 int expectedEnd = [[expectedIndices objectAtIndex:1] intValue];
@@ -345,11 +416,15 @@
                 r.length--;
                 NSString *actualText = [text substringWithRange:r];
                 
-                STAssertEqualObjects(expectedCashtag, actualText, @"%@", testCase);
+                STAssertEqualObjects(expectedSymbol, actualText, @"%@", testCase);
                 STAssertTrue(NSEqualRanges(expectedRange, actualRange), @"%@ != %@\n%@", NSStringFromRange(expectedRange), NSStringFromRange(actualRange), testCase);
             }
         } else {
-            STFail(@"Matching count is different: %lu != %lu\n%@", expected.count, results.count, testCase);
+            NSMutableArray *resultTexts = [NSMutableArray array];
+            for (TwitterTextEntity *entity in results) {
+                [resultTexts addObject:[text substringWithRange:entity.range]];
+            }
+            STFail(@"Matching count is different: %lu != %lu\n%@\n%@", expected.count, results.count, testCase, resultTexts);
         }
     }
 }
@@ -375,10 +450,46 @@
     
     for (NSDictionary *testCase in lengths) {
         NSString *text = [testCase objectForKey:@"text"];
+        text = [self stringByParsingUnicodeEscapes:text];
         NSInteger expected = [[testCase objectForKey:@"expected"] intValue];
         NSInteger len = [TwitterText tweetLength:text];
-        STAssertTrue(len == expected, @"Length should be %d (%d)", expected, len);
+        STAssertEquals(len, expected, @"Length should be the same");
     }
+}
+
+- (NSString *)stringByParsingUnicodeEscapes:(NSString *)string
+{
+    static NSRegularExpression *regex = nil;
+    if (!regex) {
+        regex = [[NSRegularExpression alloc] initWithPattern:@"\\\\U([0-9a-fA-F]{8}|[0-9a-fA-F]{4})" options:0 error:NULL];
+    }
+
+    NSInteger index = 0;
+    while (index < [string length]) {
+        NSTextCheckingResult *result = [regex firstMatchInString:string options:0 range:NSMakeRange(index, [string length] - index)];
+        if (!result) {
+            break;
+        }
+        NSRange patternRange = result.range;
+        NSRange hexRange = [result rangeAtIndex:1];
+        NSInteger resultLength = 1;
+        if (hexRange.location != NSNotFound) {
+            NSString *hexString = [string substringWithRange:hexRange];
+            long value = strtol([hexString UTF8String], NULL, 16);
+            if (value < 0x10000) {
+                string = [string stringByReplacingCharactersInRange:patternRange withString:[NSString stringWithFormat:@"%C", (UniChar)value]];
+            } else {
+                UniChar surrogates[2];
+                if (CFStringGetSurrogatePairForLongCharacter((UTF32Char)value, surrogates)) {
+                    string = [string stringByReplacingCharactersInRange:patternRange withString:[NSString stringWithCharacters:surrogates length:2]];
+                    resultLength = 2;
+                }
+            }
+        }
+        index = patternRange.location + resultLength;
+    }
+
+    return string;
 }
 
 @end
